@@ -66,5 +66,3 @@ def get_item_in_store(name):
 		else:
 			return jsonify({'message':'no items found'})
 
-if __name__ == '__main__':
-	app.run(debug=True)
