@@ -1,68 +1,22 @@
-from flask import Flask , jsonify , request , render_template
-app =Flask(__name__)
+from flask import Flask, templating, request
+import pickle
 
+with open("vect.pickle", "rb") as f:
+    vect = pickle.load(f)
 
-#post used to recieve data 
-#get used to send data back 
-#reverse in browser
-stores = [
-     {'name':'my store' ,
-    'items':[
-	{'name':'my item',
-	'price':100}]
-      }
-]
+with open("nb.pickle", "rb") as f:
+    nb = pickle.load(f)
 
-@app.route('/')
+app = Flask("chacha")
+
+@app.route("/")
 def home():
-	return render_template('index.html')
-# post /store data: {name}
-@app.route('/store', methods =['POST'])
-def create_store():
-	request_data = request.get_json()
-	new_store ={
-	'name': request_data['name'],
-	'items':[]
+    return templating.render_template("index.html")
 
-	}
-	stores.append(new_store)
-	return jsonify(new_store)
-#get /store/<string:name>
-@app.route('/store/<string:name>')
-def get_store(name):
-	for store in stores:
-		if store['name']==name:
-			return jsonify(store)
-		else:
-			return jsonify({'message':'store not found'})
-	
-
-#get / store
-@app.route('/store')
-def get_stores():
-	return jsonify({'stores': stores})
-
-@app.route('/store/<string:name>/item' ,methods=['POST'])
-def create_item_in_store(name):
-	for store in stores:
-		if store['name']==name:
-			new_item ={
-			'name': request_data['name']
-			'price':request_data['price']
-			}
-			store['items'].append(new_item)
-			return jsonify(new_item)
-	return jsonify({'message':'store not found'})
-
-
-
-
-
-@app.route('/store/<string:name>/item')
-def get_item_in_store(name):
-	for store in stores:
-		if store['name'] == name:
-			return jsonify({'items':store['items']})
-		else:
-			return jsonify({'message':'no items found'})
-
+@app.route("/submit/", methods=["post"])
+def submit():
+    message = request.form["message"]
+    x_data = vect.transform([message]).todense()
+    y_data = nb.predict(x_data)
+    print(y_data)
+    return str(y_data)
