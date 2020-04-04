@@ -1,22 +1,13 @@
-from flask import Flask, templating, request
-import pickle
+from flask import Flask , render_template , request
+app = Flask(__name__)
+@app.route('/send' , methods=['GET' , 'POST'])
+def send():
+	if request.method == 'POST':
+		tell = request.form['tell']
 
-with open("vect.pickle", "rb") as f:
-    vect = pickle.load(f)
+		return render_template('tell.html' , tell=tell)
 
-with open("nb.pickle", "rb") as f:
-    nb = pickle.load(f)
+	return render_template('index.html')
 
-app = Flask("chacha")
-
-@app.route("/")
-def home():
-    return templating.render_template("index.html")
-
-@app.route("/submit/", methods=["post"])
-def submit():
-    message = request.form["message"]
-    x_data = vect.transform([message]).todense()
-    y_data = nb.predict(x_data)
-    print(y_data)
-    return str(y_data)
+if __name__=="__main__":
+	app.run()
